@@ -27,7 +27,7 @@ function App() {
   }, []);
 
   return (
-    <Router basename="/my-portfolio">
+    <Router basename="/My-Portfolio-Full-Stack">
       <Pre load={load} />
       <div className="app-wrapper" id={load ? "no-scroll" : "scroll"}>
         <Navbar />
