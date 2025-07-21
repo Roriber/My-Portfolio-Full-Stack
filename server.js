@@ -5,7 +5,7 @@ require("dotenv").config();
 console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -23,6 +23,7 @@ app.use("/api/users", require("./server/routes/userRoutes.js"));
 app.use("/api/contacts", require("./server/routes/contactRoutes.js"));
 app.use("/api/projects", require("./server/routes/projectRoutes.js"));
 app.use("/api/education", require("./server/routes/educationRoutes.js"));
+app.use('/api/services', require('./server/routes/serviceRoutes.js'));
 app.use("/api/auth", require("./server/routes/authRoutes.js"));
 
 app.get("/", (req, res) => {
