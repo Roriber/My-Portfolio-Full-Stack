@@ -7,8 +7,10 @@ import "./style.css";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const About = lazy(() => import("./components/About/About"));
@@ -40,6 +42,9 @@ function App() {
               <Route path="/project" element={<Projects />} />
               <Route path="/services" element={<Services />} />
               <Route path="/contact" element={<Contact />} />
+              {/* Add Login and Signup routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
             </Routes>
           </Suspense>
         </div>

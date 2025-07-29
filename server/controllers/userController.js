@@ -1,4 +1,4 @@
-const User = require("../models/Users");
+const User = require("../models/User");
 
 exports.getAllUsers = async (req, res) => {
   console.log("GET /api/users hit at", new Date().toISOString());

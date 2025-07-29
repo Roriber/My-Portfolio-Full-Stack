@@ -21,7 +21,10 @@ exports.getProjectById = async (req, res) => {
 
 exports.createProject = async (req, res) => {
   try {
-    const newProject = new Project(req.body);
+    const { title, description } = req.body;
+    if (!title) return res.status(400).json({ error: "Title is required" });
+
+    const newProject = new Project({ title, description });
     const savedProject = await newProject.save();
     res.status(201).json(savedProject);
   } catch (err) {

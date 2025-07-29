@@ -3,19 +3,28 @@ import { Container, Row, Col, Card, Button, Form } from "react-bootstrap";
 import { Helmet } from "react-helmet";
 import almontImg from "../../Assets/Projects/almontpage.png";
 import dashboardImg from "../../Assets/Projects/dashboard.png";
+import loginImg from "../../Assets/Projects/login.png";
 
 function Projects() {
   const [projects, setProjects] = useState([]);
-  const [newProject, setNewProject] = useState({ name: "", description: "" });
+  const [newProject, setNewProject] = useState({ title: "", description: "" });
   const [editId, setEditId] = useState(null);
-  const [editProject, setEditProject] = useState({ name: "", description: "" });
+  const [editProject, setEditProject] = useState({ title: "", description: "" });
 
-  // Only admins can see add/edit/delete
-  const isAdmin = () => localStorage.getItem("role") === "admin";
+  // Make isAdmin check the user object for role
+  const isAdmin = () => {
+    const user = localStorage.getItem("user");
+    if (!user) return false;
+    try {
+      return JSON.parse(user).role === "admin";
+    } catch {
+      return false;
+    }
+  };
 
   // Fetch all projects (GET)
   useEffect(() => {
-    fetch("/api/projects")
+    fetch("http://localhost:5000/api/projects")
       .then((res) => res.json())
       .then((data) => setProjects(data))
       .catch((err) => console.error("Error fetching projects:", err));
@@ -24,31 +33,41 @@ function Projects() {
   // Add project (POST)
   const handleAdd = (e) => {
     e.preventDefault();
-    fetch("/api/projects", {
+    fetch("http://localhost:5000/api/projects", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(newProject),
+      body: JSON.stringify({
+        title: newProject.title,
+        description: newProject.description,
+      }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to add project!");
+        return res.json();
+      })
       .then((data) => {
         setProjects([...projects, data]);
-        setNewProject({ name: "", description: "" });
-      });
+        setNewProject({ title: "", description: "" });
+      })
+      .catch((err) => alert(err.message));
   };
 
   // Edit project (start editing)
   const handleEdit = (project) => {
     setEditId(project._id);
-    setEditProject({ name: project.name, description: project.description });
+    setEditProject({
+      title: project.title || "",
+      description: project.description || ""
+    });
   };
 
   // Update project (PUT)
   const handleUpdate = (e) => {
     e.preventDefault();
-    fetch(`/api/projects/${editId}`, {
+    fetch(`http://localhost:5000/api/projects/${editId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -60,25 +79,31 @@ function Projects() {
       .then((data) => {
         setProjects(projects.map((proj) => (proj._id === editId ? data : proj)));
         setEditId(null);
-        setEditProject({ name: "", description: "" });
-      });
+        setEditProject({ title: "", description: "" });
+      })
+      .catch((err) => alert("Failed to update project!"));
   };
 
   // Delete project (DELETE)
   const handleDelete = (id) => {
-    fetch(`/api/projects/${id}`, {
+    fetch(`http://localhost:5000/api/projects/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    }).then(() => {
-      setProjects(projects.filter((proj) => proj._id !== id));
-    });
+    })
+      .then((res) => {
+        if (res.ok) setProjects(projects.filter((proj) => proj._id !== id));
+        else alert("Failed to delete project!");
+      })
+      .catch((err) => alert("Failed to delete project!"));
   };
 
-  const getImage = (projectName) => {
-    if (projectName?.toLowerCase().includes("almont")) return almontImg;
-    if (projectName?.toLowerCase().includes("dashboard")) return dashboardImg;
+  const getImage = (projectTitle) => {
+    const title = projectTitle?.toLowerCase();
+    if (title.includes("almont")) return almontImg;
+    if (title.includes("dashboard")) return dashboardImg;
+    if (title.includes("login")) return loginImg;
     return dashboardImg;
   };
 
@@ -102,10 +127,10 @@ function Projects() {
             <Row className="justify-content-center">
               <Col md={3}>
                 <Form.Control
-                  placeholder="Name"
-                  value={newProject.name}
+                  placeholder="Title"
+                  value={newProject.title}
                   onChange={(e) =>
-                    setNewProject({ ...newProject, name: e.target.value })
+                    setNewProject({ ...newProject, title: e.target.value })
                   }
                   required
                 />
@@ -135,17 +160,17 @@ function Projects() {
               <Card className="bg-dark text-white p-3 h-100">
                 <Card.Img
                   variant="top"
-                  src={project.image || getImage(project.name)}
-                  alt={project.name}
+                  src={project.image || getImage(project.title)}
+                  alt={project.title}
                 />
                 <Card.Body>
                   {editId === project._id ? (
                     <Form onSubmit={handleUpdate}>
                       <Form.Control
                         className="mb-2"
-                        value={editProject.name}
+                        value={editProject.title}
                         onChange={(e) =>
-                          setEditProject({ ...editProject, name: e.target.value })
+                          setEditProject({ ...editProject, title: e.target.value })
                         }
                         required
                       />
@@ -153,10 +178,7 @@ function Projects() {
                         className="mb-2"
                         value={editProject.description}
                         onChange={(e) =>
-                          setEditProject({
-                            ...editProject,
-                            description: e.target.value,
-                          })
+                          setEditProject({ ...editProject, description: e.target.value })
                         }
                         required
                       />
@@ -173,7 +195,7 @@ function Projects() {
                     </Form>
                   ) : (
                     <>
-                      <Card.Title>{project.name}</Card.Title>
+                      <Card.Title>{project.title}</Card.Title>
                       <Card.Text>
                         {project.description || "No description provided."}
                       </Card.Text>
