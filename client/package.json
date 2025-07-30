@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5000",
-  "homepage": "https://roriber.github.io/My-Portfolio-Full-Stack/",
+  "homepage": "https://Roriber.github.io/My-Portfolio-Full-Stack",
   "dependencies": {
     "@react-pdf/renderer": "^2.2.0",
     "@testing-library/jest-dom": "^5.16.2",
